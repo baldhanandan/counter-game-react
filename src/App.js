@@ -1,7 +1,7 @@
 import './App.css';
 import Header from './myComponents/Header';
 import {Footer} from './myComponents/Footer';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Playerform } from './myComponents/Playerform';
 import {Score} from './myComponents/Score';
 import {Startgame} from './myComponents/Startgame';

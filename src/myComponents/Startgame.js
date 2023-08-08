@@ -1,59 +1,66 @@
-import React, { useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { useLocation } from 'react-router-dom';
+import { Sgameiteam } from './Sgameiteam';
 
-export const Startgame = ({addScore}) => {
-    const [Score1, setScore1] = useState(0);
-    const [Score2, setScore2] = useState(0);
-    const [winner,SetWinner] = useState("");
-    const [winBy,setWinBy] =useState(0);
+export const Startgame = ({addScore}) => { 
     const location = useLocation();
     const data= location.state || {};
     const player11=data.player1;
     const player22=data.player2;
-
-
-    const handleAdd1 = () => {
-       
-        setScore1(Score1 + 1);
-        if(Score1>Score2){
-             SetWinner(player11); 
-        }
-        else if(Score1<Score2){
-            SetWinner(player22); 
-        }
-        else{
-            SetWinner("Na"); 
-        }
-        console.log(Score1,Score2);
-        setWinBy(Math.abs(Score1-Score2));
-    };
+    const [players,setPlayers] = useState([
+        { 
+          sno:1,
+          name: player11, 
+          score: 0 
+        },
+        { 
+            sno:2,
+          name: player22, 
+           score: 0 
+        },
+      ]);
     
-
-    const handleAdd2 = () => {
+        const handleAddScore = useCallback((index) => {
+            const tmp = [...players];
+            tmp[index].score += 1
+            setPlayers(tmp)
+            
+      
+       console.log(players[0].score,players[1].score);
         
-        setScore2(Score2 + 1);
-        if(Score1>Score2){
-             SetWinner(player11); 
+      },[]);
+      const winby=useMemo(function findwinby(){
+        return Math.abs(players[0].score-players[1].score);
+      },[players[0].score,players[1].score]
+
+      )
+
+      const winner=useMemo(function findwinner(){
+        if(players[0].score>players[1].score){
+            return players[0].name;
         }
-        else if(Score1<Score2){
-            SetWinner(player22); 
+        else if(players[0].score<players[1].score){
+            return players[1].name;
         }
         else{
-            SetWinner("Na"); 
+            return "Its a tie";
         }
-        setWinBy(Math.abs(Score1-Score2));
-        console.log(player11,player22);
-    };
+      },[players[0].score,players[1].score]
+
+      )
+
+
+   
     const submit= (e)=>{
         e.preventDefault();
-        if(Score1===0 && Score2===0){
+        if(players[1].score===0 && players[0].score===0){
             alert("you Didn't played a game");
         }
         const data={
-            player1:player11,
-            player2:player22,
+            player1:players[0].name,
+            player2:players[1].name,
             winner:winner,
-            winBy:winBy,
+            winBy:winby,
         }
         addScore(data);
 
@@ -62,46 +69,10 @@ export const Startgame = ({addScore}) => {
     <div className='container'>
         <p>{}</p>
         <form onSubmit={submit}>
-        <div className="row">
-            <div className="col">
-                <input className="form-control" type="text" value={player11} aria-label="Disabled input example" disabled readonly />
-            </div>
-            <div className="col">
-            <button onClick={handleAdd1} type="button" class="btn btn-primary">Add</button>
-            </div>
-        </div>
-        <br/>
-        <br/>
-        <div className="row">
-            <div className="col">
-                <input className="form-control" type="text" value={"Score of "+player11} aria-label="Disabled input example" disabled readonly />
-            </div>
-            <div className="col">
-                <input type="number" value={Score1} className="form-control" placeholder="Player 1 Score" aria-label="Player 1 Score" disabled readonly/>
-            </div>
-        </div>
-        <br/>
-        <br/>
-        <div className="row">
-            <div className="col">
-                <input className="form-control" type="text" value={player22} aria-label="Disabled input example" disabled readonly />
-            </div>
-            <div className="col">
-            <button onClick={handleAdd2} type="button" class="btn btn-primary">Add</button>
-            </div>
-        </div>
-        <br/>
-        <br/>
-        <div className="row">
-            <div className="col">
-                <input className="form-control" type="text" value={"Score of "+player22} aria-label="Disabled input example" disabled readonly />
-            </div>
-            <div className="col">
-                <input type="number" value={Score2} className="form-control" placeholder="0" aria-label="Player 1 Score" disabled readonly/>
-            </div>
-        </div>
-        <br/>
-        <br/>
+        {players.map((player)=>{
+            return <Sgameiteam  player={player} key={player.sno} handleAddScore={handleAddScore} index={players.indexOf(player)}/>
+          }
+         )}
         <div className="row">
             <div className="col">
                 <input className="form-control" type="text" value="Current Winner" aria-label="Disabled input example" disabled readonly />
@@ -117,11 +88,12 @@ export const Startgame = ({addScore}) => {
                 <input className="form-control" type="text" value="with Difference" aria-label="Disabled input example" disabled readonly />
             </div>
             <div className="col">
-                <input type="number" value={winBy} className="form-control" placeholder="Game started" aria-label="winby" disabled readonly/>
+                <input type="number" value={winby} className="form-control" placeholder="Game started" aria-label="winby" disabled readonly/>
             </div>
         </div>
         <br/>
         <br/>
+        
         <button type="submit" className="btn btn-sm btn-success">Submit</button>
         <br/>
         <br/>
